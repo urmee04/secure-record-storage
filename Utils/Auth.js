@@ -1,21 +1,28 @@
-const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken"); //JWT secret from environment variables
 
-const secret = process.env.JWT_SECRET; //JWT secret from environment variables
-const expiration = "24d"; //token expiration time
+const secret = process.env.JWT_SECRET;
+const expiration = "24d";
+
+if (!secret) {
+  throw new Error("JWT_SECRET must be defined in environment variables");
+}
+
+// helper for sending auth errors
+const authError = (res, message = "Unauthorized") => {
+  return res.status(401).json({ message });
+};
 
 module.exports = {
   //authentication middleware to verify JWT tokens
-  authMiddleware: function (req, res, next) {
-    let token = req.headers.authorization; //get token from authorization header
+  authMiddleware: (req, res, next) => {
+    // allow token from header, query, or body
+    let token = req.headers.authorization || req.query.token || req.body.token;
 
-    if (token) {
-      token = token.split(" ").pop().trim(); //extract token from "Bearer <token>" format
-    }
-
-    if (!token) {
-      return res
-        .status(401)
-        .json({ message: "You must be logged in to do that" }); //no token provided
+    if (token && token.startsWith("Bearer ")) {
+      //extracts just the JWT token part from the "Bearer <token>" header format.
+      token = token.split(" ")[1].trim();
+    } else {
+      return authError(res, "You must be logged in");
     }
 
     try {
@@ -24,12 +31,15 @@ module.exports = {
       next(); //proceed to next middleware/route
     } catch (err) {
       console.error("Invalid token:", err); //log error for debugging
-      return res.status(401).json({ message: "Invalid token" }); //invalid or expired token
+
+      if (err.name === "TokenExpiredError") {
+        return authError(res, "Session expired, please log in again");
+      }
+      return authError(res, "Invalid token");
     }
   },
-
   //function to create signed JWT tokens for authentication
-  signToken: function ({ username, email, _id }) {
+  signToken: ({ username, email, _id }) => {
     //user data to include in token
     const payload = { username, email, _id };
     //sign and return token
