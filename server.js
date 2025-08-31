@@ -1,5 +1,4 @@
 const express = require("express");
-const path = require("path");
 const db = require("./config/connection"); //database connection configuration
 const routes = require("./routes/api/index"); //API routes
 require("dotenv").config(); //load environment variables from .env file
