@@ -2,24 +2,25 @@ const router = require("express").Router();
 const { Note } = require("../../models/Note");
 const { authMiddleware } = require("../../Utils/Auth");
 
-// GET /api/notes - Get all notes for the logged-in user
+// Apply authMiddleware to all note routes
+router.use(authMiddleware);
+
+// GET /api/notes - Get only the logged-in user's notes
 router.get("/", async (req, res) => {
-  // This currently finds all notes in the database.
-  // It should only find notes owned by the logged in user.
   try {
-    const notes = await Note.find({});
+    const notes = await Note.find({ user: req.user._id });
     res.json(notes);
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-// POST /api/notes - Create a new note
+// POST /api/notes - Create a new note for the logged-in user
 router.post("/", async (req, res) => {
   try {
     const note = await Note.create({
       ...req.body,
-      // The user ID needs to be added here
+      user: req.user._id, // associate note with logged-in user
     });
     res.status(201).json(note);
   } catch (err) {
@@ -27,30 +28,44 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT /api/notes/:id - Update a note
+// PUT /api/notes/:id - Update note only if owned by logged-in user
 router.put("/:id", async (req, res) => {
   try {
-    // This needs an authorization check
-    const note = await Note.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const note = await Note.findById(req.params.id);
     if (!note) {
       return res.status(404).json({ message: "No note found with this id!" });
     }
+
+    if (note.user.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "User is not authorized to update this note" });
+    }
+
+    Object.assign(note, req.body);
+    await note.save();
+
     res.json(note);
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-// DELETE /api/notes/:id - Delete a note
+// DELETE /api/notes/:id - Delete note only if owned by logged-in user
 router.delete("/:id", async (req, res) => {
   try {
-    // This needs an authorization check
-    const note = await Note.findByIdAndDelete(req.params.id);
+    const note = await Note.findById(req.params.id);
     if (!note) {
       return res.status(404).json({ message: "No note found with this id!" });
     }
+
+    if (note.user.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "User is not authorized to delete this note" });
+    }
+
+    await note.deleteOne();
     res.json({ message: "Note deleted!" });
   } catch (err) {
     res.status(500).json(err);
