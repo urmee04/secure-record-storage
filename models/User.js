@@ -24,7 +24,6 @@ const userSchema = new Schema({
 });
 
 //hash user password
-
 userSchema.pre("save", async function (next) {
   if (this.isNew || this.isModified("password")) {
     const saltRounds = 10;
@@ -41,5 +40,5 @@ userSchema.methods.isCorrectPassword = async function (password) {
 
 //compile schema into model
 const User = model("User", userSchema);
-
+//export model
 module.exports = User;
