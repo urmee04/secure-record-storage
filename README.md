@@ -18,6 +18,13 @@ This lab is a secure Express.js API for managing user notes with proper authenti
 - Node.js (v14 or higher)
 - MongoDB (local or cloud instance like MongoDB Atlas)
 - npm
+- express 
+- mongoose 
+- dotenv 
+- jsonwebtoken 
+- bcrypt 
+- nodemon
+
 
 ##### Installation
 
@@ -27,7 +34,7 @@ This lab is a secure Express.js API for managing user notes with proper authenti
 git clone https://github.com/urmee04/secure-record-storage.git
 ```
 
-`cd secure-record-storage`
+   `cd secure-record-storage`
 
 2.  Install dependencies:
     `npm install` 
@@ -70,7 +77,7 @@ The API returns appropriate HTTP status codes:
 ---
 
 #### Project Structure
-
+```bash
 ├── models/
 │   ├── Note.js
 │   └── User.js
@@ -87,7 +94,7 @@ The API returns appropriate HTTP status codes:
 │   └── connection.js
 ├── server.js
 └── package.json
-
+```
 ---
 
 #### Example usage with postman
