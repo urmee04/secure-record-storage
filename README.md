@@ -43,8 +43,8 @@ git clone https://github.com/urmee04/secure-record-storage.git
     Create a .env file in the root directory with the following variables:
 
 ```bash
-MONGODB_URI=mongodb://localhost:3000/notes
-JWT_SECRET=your-super-secret-jwt-key-here
+MONGODB_URI=mongodb_connection_string
+JWT_SECRET=super-secret-jwt-key-here
 PORT=3000
 ```
 
