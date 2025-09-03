@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { User } = require("../../models/User");
+const User = require("../../models/User");
 const { signToken } = require("../../Utils/Auth");
 
 //POST /api/users/register - create a new user
@@ -9,6 +9,7 @@ router.post("/register", async (req, res) => {
     const token = signToken(user);
     res.status(201).json({ token, user });
   } catch (err) {
+    console.error("User registration error:", err.message);
     res.status(400).json(err);
   }
 });
